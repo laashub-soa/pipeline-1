@@ -119,19 +119,6 @@ Resources:
               - s3:GetObject
               - s3:PutObject
               - s3:DeleteObject
-              - autoscaling:DescribeAutoScalingGroups
-              - autoscaling:UpdateAutoScalingGroup
-              - autoscaling:DescribeAutoScalingInstances
-              - autoscaling:DescribeTags
-              - autoscaling:DescribeLaunchConfigurations
-              - autoscaling:SetDesiredCapacity
-              - autoscaling:TerminateInstanceInAutoScalingGroup
-              - autoscaling:PutLifecycleHook
-              - autoscaling:RecordLifecycleActionHeartbeat
-              - autoscaling:DescribeLifecycleHooks
-              - autoscaling:CompleteLifecycleAction
-              - autoscaling:DeleteLifecycleHook
-              - autoscaling:DetachInstances
               Resource: "*"
 
 Outputs:

@@ -56,7 +56,8 @@ type nodeGroup struct {
 }
 
 type rbac struct {
-	Create bool `json:"create"`
+	Create                    bool              `json:"create"`
+	ServiceAccountAnnotations map[string]string `json:"serviceAccountAnnotations"`
 }
 
 type azureInfo struct {
@@ -181,7 +182,12 @@ func createAutoscalingForEks(cluster CommonCluster, groups []nodeGroup) *autosca
 			"v":        logLevel,
 			"expander": expanderStrategy,
 		},
-		Rbac:      rbac{Create: true},
+		Rbac: rbac{
+			Create: true,
+			ServiceAccountAnnotations: map[string]string{
+				"eks.amazonaws.com/role-arn": fmt.Sprintf("arn:aws:iam::999653275263:role/ClusterAutoScalerRole-%s", cluster.GetName()),
+			},
+		},
 		AwsRegion: cluster.GetLocation(),
 		AutoDiscovery: autoDiscovery{
 			ClusterName: cluster.GetName(),
