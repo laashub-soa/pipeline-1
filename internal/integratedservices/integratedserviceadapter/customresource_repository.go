@@ -16,9 +16,11 @@ package integratedserviceadapter
 
 import (
 	"context"
+	"encoding/json"
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/integrated-service-sdk/api/v1alpha1"
+	"github.com/banzaicloud/pipeline/internal/common"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -32,25 +34,27 @@ import (
 
 // crRepository repository implementation that directly accesses a custom resources in a kubernetes cluster
 type crRepository struct {
-	scheme       *runtime.Scheme
-	kubeConfigFn integratedservices.ClusterKubeConfigFunc
-	specWrapper  integratedservices.SpecWrapper
-	statusMapper services.StatusMapper
-	namespace    string
+	scheme        *runtime.Scheme
+	kubeConfigFn  integratedservices.ClusterKubeConfigFunc
+	statusMapper  services.StatusMapper
+	secretMappers map[string]integratedservices.SecretMapper
+	logger        common.Logger
+	namespace     string
 }
 
 // Creates a new CR repository instance to access integrated services in a k8s cluster
-func NewCRRepository(kubeConfigFn integratedservices.ClusterKubeConfigFunc, wrapper integratedservices.SpecWrapper, namespace string) integratedservices.IntegratedServiceRepository {
+func NewCRRepository(kubeConfigFn integratedservices.ClusterKubeConfigFunc, logger common.Logger, secretMappers map[string]integratedservices.SecretMapper, namespace string) integratedservices.IntegratedServiceRepository {
 	scheme := runtime.NewScheme()
 	_ = clientgoscheme.AddToScheme(scheme)
 	_ = v1alpha1.AddToScheme(scheme)
 
 	return crRepository{
-		scheme:       scheme,
-		kubeConfigFn: kubeConfigFn,
-		specWrapper:  wrapper,
-		namespace:    namespace,
-		statusMapper: services.NewServiceStatusMapper(),
+		scheme:        scheme,
+		kubeConfigFn:  kubeConfigFn,
+		namespace:     namespace,
+		secretMappers: secretMappers,
+		logger:        logger,
+		statusMapper:  services.NewServiceStatusMapper(),
 	}
 }
 
@@ -67,7 +71,7 @@ func (c crRepository) GetIntegratedServices(ctx context.Context, clusterID uint)
 
 	iSvcs := make([]integratedservices.IntegratedService, 0, len(lookupISvcs.Items))
 	for _, si := range lookupISvcs.Items {
-		transformed, err := c.transform(si)
+		transformed, err := c.transform(ctx, si)
 		if err != nil {
 			continue
 		}
@@ -90,8 +94,8 @@ func (c crRepository) GetIntegratedService(ctx context.Context, clusterID uint, 
 			Namespace: c.namespace,
 		},
 	}
-	key, okErr := client.ObjectKeyFromObject(&lookupSI)
-	if okErr != nil {
+	key, err := client.ObjectKeyFromObject(&lookupSI)
+	if err != nil {
 		return emptyIS, errors.Wrap(err, "failed to get object key for lookup")
 	}
 
@@ -106,7 +110,7 @@ func (c crRepository) GetIntegratedService(ctx context.Context, clusterID uint, 
 		return emptyIS, errors.Wrap(err, "failed to look up service instance")
 	}
 
-	return c.transform(lookupSI)
+	return c.transform(ctx, lookupSI)
 }
 
 func (c crRepository) SaveIntegratedService(_ context.Context, _ uint, _ string, _ integratedservices.IntegratedServiceSpec, _ string) error {
@@ -150,15 +154,33 @@ func (c crRepository) k8sClientForCluster(ctx context.Context, clusterID uint) (
 	return cli, nil
 }
 
-func (c crRepository) transform(instance v1alpha1.ServiceInstance) (integratedservices.IntegratedService, error) {
-	apiSpec, err := c.specWrapper.Unwrap(context.Background(), []byte(instance.Spec.Config))
-	if err != nil {
-		return integratedservices.IntegratedService{}, errors.Wrap(err, "failed to unwrap configuration from custom resource")
+func (c crRepository) transform(ctx context.Context, instance v1alpha1.ServiceInstance) (integratedservices.IntegratedService, error) {
+	var serviceSpec integratedservices.IntegratedServiceSpec
+
+	if instance.Spec.ServiceSpec != "" {
+		if err := json.Unmarshal([]byte(instance.Spec.ServiceSpec), &serviceSpec); err != nil {
+			return integratedservices.IntegratedService{}, errors.WrapIf(err, "failed to decode api spec")
+		}
+	}
+
+	if services.IsManagedByPipeline(instance.ObjectMeta) {
+		for name, mapper := range c.secretMappers {
+			if name == instance.Spec.Service {
+				if mappedServiceSpec, err := mapper.MapSecrets(ctx, serviceSpec); err != nil {
+					return integratedservices.IntegratedService{}, errors.WrapIfWithDetails(err,
+						"failed to map secret names back to secret ids for the service instance",
+						"service", instance.Spec.Service)
+				} else {
+					serviceSpec = mappedServiceSpec
+				}
+				break
+			}
+		}
 	}
 
 	return integratedservices.IntegratedService{
 		Name:   instance.Name,
-		Spec:   apiSpec,
+		Spec:   serviceSpec,
 		Status: c.statusMapper.MapStatus(instance),
 	}, nil
 }

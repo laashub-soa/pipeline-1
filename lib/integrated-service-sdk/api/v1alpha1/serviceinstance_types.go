@@ -23,7 +23,10 @@ type ServiceInstanceSpec struct {
 	Service string `json:"service,omitempty"`
 	Version string `json:"version,omitempty"`
 	Enabled *bool  `json:"enabled,omitempty"`
-	Config  string `json:"config,omitempty"`
+	// Overrides configuration computed based on the ServiceSpec
+	Overrides string `json:"overrides,omitempty"`
+	// ServiceSpec the specification as received through the API
+	ServiceSpec string `json:"serviceSpec,omitempty"`
 }
 
 type Status string

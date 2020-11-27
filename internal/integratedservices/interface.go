@@ -215,3 +215,9 @@ func (e ClusterIsNotReadyError) ShouldRetry() bool {
 type ServiceNameMapper interface {
 	MapServiceName(serviceName string) string
 }
+
+type SecretMapper interface {
+	// MapSecrets maps secret names in the integrated service spec back to vault secret IDs if they exist
+	// and returns the modified integrated service spec
+	MapSecrets(ctx context.Context, spec IntegratedServiceSpec) (IntegratedServiceSpec, error)
+}

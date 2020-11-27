@@ -112,7 +112,6 @@ import (
 	"github.com/banzaicloud/pipeline/internal/integratedservices/services"
 	integratedServiceDNS "github.com/banzaicloud/pipeline/internal/integratedservices/services/dns"
 	"github.com/banzaicloud/pipeline/internal/integratedservices/services/dns/dnsadapter"
-	"github.com/banzaicloud/pipeline/internal/integratedservices/services/dns/externaldns"
 	"github.com/banzaicloud/pipeline/internal/integratedservices/services/expiry"
 	"github.com/banzaicloud/pipeline/internal/integratedservices/services/ingress"
 	integratedServiceLogging "github.com/banzaicloud/pipeline/internal/integratedservices/services/logging"
@@ -926,7 +925,10 @@ func main() {
 
 					integratedServiceOperationDispatcher := integratedserviceadapter.MakeCadenceIntegratedServiceOperationDispatcher(workflowClient, commonLogger)
 					integratedServiceManagerRegistry := integratedservices.MakeIntegratedServiceManagerRegistry(integratedServiceManagers)
-					clusterRepository := integratedserviceadapter.NewCRRepository(clusterManager.KubeConfigFunc(), externaldns.NewSpecWrapper(), config.Cluster.Namespace)
+					secretMappers := map[string]integratedservices.SecretMapper{
+						integratedServiceDNS.IntegratedServiceName: integratedServiceDNS.NewSecretMapper(commonSecretStore),
+					}
+					clusterRepository := integratedserviceadapter.NewCRRepository(clusterManager.KubeConfigFunc(), commonLogger, secretMappers, config.Cluster.Namespace)
 					integratedServicesService = integratedservices.NewISServiceV2(integratedServiceManagerRegistry, integratedServiceOperationDispatcher, clusterRepository, services.NewServiceNameMapper(), commonLogger)
 				} else {
 					// legacy setup
