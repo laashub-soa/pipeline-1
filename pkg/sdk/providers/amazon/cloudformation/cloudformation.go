@@ -21,6 +21,7 @@ import (
 	"strconv"
 
 	"emperror.dev/errors"
+	"github.com/Masterminds/semver/v3"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/mitchellh/mapstructure"
@@ -110,6 +111,14 @@ func parseStackValue(rawValue string, resultType interface{}) (result interface{
 		return strconv.ParseFloat(rawValue, 0)
 	case int:
 		return strconv.Atoi(rawValue)
+	case semver.Version:
+		typedResult, err := semver.NewVersion(rawValue)
+		if err != nil ||
+			typedResult == nil {
+			return semver.Version{}, err
+		}
+
+		return *typedResult, nil
 	case string:
 		return rawValue, nil
 	case uint:

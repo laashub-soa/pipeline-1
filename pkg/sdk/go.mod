@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	emperror.dev/errors v0.7.0
+	github.com/Masterminds/semver/v3 v3.1.1
 	github.com/aws/aws-sdk-go v1.34.4
 	github.com/golang/mock v1.4.3 // indirect
 	github.com/jinzhu/gorm v1.9.16
