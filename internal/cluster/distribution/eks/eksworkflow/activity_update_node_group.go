@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"emperror.dev/errors"
+	"github.com/Masterminds/semver/v3"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/request"
@@ -68,7 +69,7 @@ type UpdateNodeGroupActivityInput struct {
 
 	ClusterTags map[string]string
 
-	TemplateVersion string
+	CurrentTemplateVersion semver.Version
 }
 
 type UpdateNodeGroupActivityOutput struct {
@@ -117,7 +118,7 @@ func (a UpdateNodeGroupActivity) Execute(ctx context.Context, input UpdateNodeGr
 		),
 		sdkCloudFormation.NewOptionalStackParameter(
 			"CustomNodeSecurityGroups",
-			input.SecurityGroups != nil || input.TemplateVersion == "1.0.0",
+			input.SecurityGroups != nil || input.CurrentTemplateVersion.LessThan(semver.MustParse("2.0.0")), // Note: older templates cannot use non-existing previous value.
 			strings.Join(input.SecurityGroups, ","),
 		),
 		{

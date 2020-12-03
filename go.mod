@@ -17,7 +17,7 @@ require (
 	github.com/Azure/go-autorest/autorest/to v0.4.0
 	github.com/Azure/go-autorest/autorest/validation v0.3.0
 	github.com/MakeNowJust/heredoc v1.0.0
-	github.com/Masterminds/semver/v3 v3.1.0
+	github.com/Masterminds/semver/v3 v3.1.1
 	github.com/ThreeDotsLabs/watermill v1.1.0
 	github.com/aliyun/alibaba-cloud-sdk-go v1.60.327
 	github.com/aliyun/aliyun-oss-go-sdk v2.0.5+incompatible
