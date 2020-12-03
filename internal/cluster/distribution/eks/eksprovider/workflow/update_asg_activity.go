@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"emperror.dev/errors"
+	"github.com/Masterminds/semver/v3"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/request"
@@ -73,6 +74,8 @@ type UpdateAsgActivityInput struct {
 
 	Labels map[string]string
 	Tags   map[string]string
+
+	CurrentTemplateVersion semver.Version
 }
 
 // UpdateAsgActivityOutput holds the output data of the UpdateAsgActivityOutput
