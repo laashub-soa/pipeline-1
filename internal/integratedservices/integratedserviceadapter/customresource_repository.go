@@ -20,7 +20,6 @@ import (
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/integrated-service-sdk/api/v1alpha1"
-	"github.com/banzaicloud/pipeline/internal/common"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -28,6 +27,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/banzaicloud/pipeline/internal/common"
 	"github.com/banzaicloud/pipeline/internal/integratedservices"
 	"github.com/banzaicloud/pipeline/internal/integratedservices/services"
 )
@@ -166,13 +166,13 @@ func (c crRepository) transform(ctx context.Context, instance v1alpha1.ServiceIn
 	if services.IsManagedByPipeline(instance.ObjectMeta) {
 		for name, mapper := range c.secretMappers {
 			if name == instance.Spec.Service {
-				if mappedServiceSpec, err := mapper.MapSecrets(ctx, serviceSpec); err != nil {
+				mappedServiceSpec, err := mapper.MapSecrets(ctx, serviceSpec)
+				if err != nil {
 					return integratedservices.IntegratedService{}, errors.WrapIfWithDetails(err,
 						"failed to map secret names back to secret ids for the service instance",
 						"service", instance.Spec.Service)
-				} else {
-					serviceSpec = mappedServiceSpec
 				}
+				serviceSpec = mappedServiceSpec
 				break
 			}
 		}

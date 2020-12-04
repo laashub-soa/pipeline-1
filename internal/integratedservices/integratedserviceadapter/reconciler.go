@@ -23,7 +23,6 @@ import (
 	"github.com/banzaicloud/integrated-service-sdk/api/v1alpha1"
 	"github.com/banzaicloud/operator-tools/pkg/reconciler"
 	"github.com/banzaicloud/operator-tools/pkg/utils"
-	"github.com/banzaicloud/pipeline/internal/integratedservices/services"
 	"golang.org/x/mod/semver"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -32,6 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/banzaicloud/pipeline/internal/common"
+	"github.com/banzaicloud/pipeline/internal/integratedservices/services"
 )
 
 // Reconciler decouples handling of custom resources on a kubernetes cluster

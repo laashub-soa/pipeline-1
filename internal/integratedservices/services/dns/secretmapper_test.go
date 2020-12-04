@@ -19,8 +19,9 @@ import (
 	"testing"
 
 	"emperror.dev/errors"
-	"github.com/banzaicloud/pipeline/internal/integratedservices"
 	"github.com/stretchr/testify/require"
+
+	"github.com/banzaicloud/pipeline/internal/integratedservices"
 )
 
 func TestSecretMapperSucceed(t *testing.T) {

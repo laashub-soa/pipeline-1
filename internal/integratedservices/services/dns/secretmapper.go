@@ -18,9 +18,10 @@ import (
 	"context"
 
 	"emperror.dev/errors"
+	"github.com/mitchellh/mapstructure"
+
 	"github.com/banzaicloud/pipeline/internal/integratedservices"
 	"github.com/banzaicloud/pipeline/internal/integratedservices/services"
-	"github.com/mitchellh/mapstructure"
 )
 
 type SecretMapper struct {
