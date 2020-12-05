@@ -237,7 +237,7 @@ test-integrated-service-worker: build-worker
 .PHONY: test-integrated-service-down
 test-integrated-service-down:
 	docker-compose -p pipeline-is-test --project-directory $(PWD) -f $(PWD)/internal/integratedservices/testconfig/docker-compose.yml down
-	kind delete clusters pipeline-is-test
+	#kind delete clusters pipeline-is-test
 
 bin/test/kube-apiserver:
 	@mkdir -p bin/test

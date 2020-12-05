@@ -585,10 +585,11 @@ func main() {
 
 			var featureRepository integratedservices.IntegratedServiceRepository
 			if config.IntegratedService.V2 {
-				secretMappers := map[string]integratedservices.SecretMapper{
+				secretMappers := map[string]integratedservices.SpecMapper{
 					integratedServiceDNS.IntegratedServiceName: integratedServiceDNS.NewSecretMapper(commonSecretStore),
 				}
-				featureRepository = integratedserviceadapter.NewCRRepository(clusterManager.KubeConfigFunc(), commonLogger, secretMappers, config.Cluster.Namespace)
+				specTransformation := integratedserviceadapter.NewSpecTransformation(services.NewServiceStatusMapper(), secretMappers)
+				featureRepository = integratedserviceadapter.NewCRRepository(clusterManager.KubeConfigFunc(), commonLogger, specTransformation, config.Cluster.Namespace)
 			} else {
 				featureRepository = integratedserviceadapter.NewGormIntegratedServiceRepository(db, logger)
 			}

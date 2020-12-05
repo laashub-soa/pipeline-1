@@ -216,8 +216,7 @@ type ServiceNameMapper interface {
 	MapServiceName(serviceName string) string
 }
 
-type SecretMapper interface {
-	// MapSecrets maps secret names in the integrated service spec back to vault secret IDs if they exist
-	// and returns the modified integrated service spec
-	MapSecrets(ctx context.Context, spec IntegratedServiceSpec) (IntegratedServiceSpec, error)
+type SpecMapper interface {
+	// MapSpec maps certain values in integrated spec while keeping it's original type structure
+	MapSpec(ctx context.Context, spec IntegratedServiceSpec) (IntegratedServiceSpec, error)
 }

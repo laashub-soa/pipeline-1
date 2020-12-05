@@ -31,7 +31,7 @@ func TestSecretMapperSucceed(t *testing.T) {
 		},
 	}
 	mapper := NewSecretMapper(secretStore)
-	spec, err := mapper.MapSecrets(context.TODO(), integratedservices.IntegratedServiceSpec{
+	spec, err := mapper.MapSpec(context.TODO(), integratedservices.IntegratedServiceSpec{
 		"externalDns": map[string]interface{}{
 			"provider": map[string]string{
 				"secretId": "fake-secret-name",
@@ -53,7 +53,7 @@ func TestSecretMapperFail(t *testing.T) {
 		},
 	}
 	mapper := NewSecretMapper(secretStore)
-	_, err := mapper.MapSecrets(context.TODO(), integratedservices.IntegratedServiceSpec{
+	_, err := mapper.MapSpec(context.TODO(), integratedservices.IntegratedServiceSpec{
 		"externalDns": map[string]interface{}{
 			"provider": map[string]string{
 				"secretId": "unknown-secret-name",

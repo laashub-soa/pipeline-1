@@ -34,7 +34,7 @@ func NewSecretMapper(secretStore services.SecretStore) *SecretMapper {
 	}
 }
 
-func (s SecretMapper) MapSecrets(ctx context.Context, spec integratedservices.IntegratedServiceSpec) (integratedservices.IntegratedServiceSpec, error) {
+func (s SecretMapper) MapSpec(ctx context.Context, spec integratedservices.IntegratedServiceSpec) (integratedservices.IntegratedServiceSpec, error) {
 	typedSpec, err := bindIntegratedServiceSpec(spec)
 	if err != nil {
 		return integratedservices.IntegratedServiceSpec{}, errors.WrapIf(err, "unable to bind dns spec for mapping secrets")
